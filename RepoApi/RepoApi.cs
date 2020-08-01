@@ -2,6 +2,7 @@
 using LibGit2Sharp.Handlers;
 using RepositoryApi.Helpers;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -11,7 +12,15 @@ namespace RepositoryApi
     {
         private readonly Repository repository;
 
-        private RepoApi(Repository repo) => repository = repo;
+        private readonly Lazy<ReadonlyHashset<string>> tags;
+
+        private RepoApi(Repository repo)
+        {
+            repository = repo;
+            tags = new Lazy<ReadonlyHashset<string>>(() => repository.Tags.Select(t => t.FriendlyName).ToReadonlyHashset());
+        }
+
+        public ReadonlyHashset<string> Tags => tags.Value;
 
         public void Dispose() => ((IDisposable)repository).Dispose();
 
